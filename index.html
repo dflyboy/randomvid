@@ -30,6 +30,7 @@
     <div id="formul">
         <label>Channel Id: <input id="channel-id" value='' type="text"/></label>
         <button id="channel-button" disabled onclick="playRandom();">Play random video</button>
+        <button id="next-video-button" disabled onclick="nextVideo();">Next</button>
     </div>
     <div id="status"></div>
 </section>
@@ -91,6 +92,7 @@ function processRequest(result) {
             var ytVideo = window.vidList[vidID].contentDetails.videoId;
             console.log("Selected video: "+ytVideo);
             playVideo(ytVideo);
+            $('#next-video-button').removeAttr("disabled");
         }
     }
 }
@@ -165,6 +167,15 @@ function doRequest(listID, pToken) {
             'onStateChange': onPlayerStateChange
           }
         });
+    }
+    
+    function nextVideo() {
+        if(window.vidList.length>0) {
+            var vidID = randV(0,window.vidList.length);
+            var ytVideo = window.vidList[vidID].contentDetails.videoId;
+            console.log("Selected video: "+ytVideo);
+            playVideo(ytVideo);           
+        }
     }
 </script>
 <script src="https://apis.google.com/js/client.js?onload=googleApiClientReady"></script>
