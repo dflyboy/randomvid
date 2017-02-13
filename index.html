@@ -4,23 +4,36 @@
     <meta charset="utf-8">
     <title>Random video</title>
     <style>
-    
+    section {
+        border-radius: 1em;
+        padding: 1em;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-right: -50%;
+        transform: translate(-50%, -50%) }
+        label {
+            font-family: Calibri, Verdana, sans-serif;
+        }
+#formul {
+    width: 40%;
+    margin: 0 auto; 
+}
+}
+
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
     <script src="https://apis.google.com/js/api.js"></script>
 </head>
 <body>
- 
-    <div id="playerframe"><div id="player"></div></div>
+<section>
+    <div class="container" id="playerframe"><div id="player"></div></div>
     <div id="formul">
-        <label>Playlist Id: <input id="playlist-id" value='' type="text"/></label>
-        <button id="playlist-button" disabled onclick="playRandom();">Play random video</button>
-    </div>
-    <div id="formul2">
         <label>Channel Id: <input id="channel-id" value='' type="text"/></label>
         <button id="channel-button" disabled onclick="playRandom();">Play random video</button>
     </div>
     <div id="status"></div>
+</section>
 <script>
 var player;
 
@@ -113,19 +126,11 @@ function doRequest(listID, pToken) {
     }
     
     function playVideo(videoID) {
-        player = new YT.Player('player', {
-          height: '720',
-          width: '1280',
-          videoId: videoID,
-          events: {
-            'onReady': onPlayerReady,
-            'onStateChange': onPlayerStateChange
-          }
-        });
+        player.loadVideoById(videoID);
     }
 
     function onPlayerReady(event) {
-        event.target.playVideo();
+        //event.target.playVideo();
       }
 
      var done = false;
@@ -143,8 +148,25 @@ function doRequest(listID, pToken) {
       tag.src = "https://www.youtube.com/iframe_api";
       var firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
+        player = new YT.Player('player', {
+          height: '720',
+          width: '1280',
+          events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+          }
+        });
     });
+    function onYouTubeIframeAPIReady() {
+        player = new YT.Player('player', {
+          height: '720',
+          width: '1280',
+          events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+          }
+        });
+    }
 </script>
 <script src="https://apis.google.com/js/client.js?onload=googleApiClientReady"></script>
 </body>
