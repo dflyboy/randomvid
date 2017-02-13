@@ -41,7 +41,8 @@ gapi.client.init({
 };
 
 function channelResponse(response) {
-    if(respone) {
+    if(response) {
+        console.log(JSON.stringify(response));
         window.vidList = [];
         var listID = response.items[0].contentDetails.relatedPlaylists.uploads;
         window.listID=listID;
@@ -56,7 +57,7 @@ function getUploadList(channel) {
     };
     //define request    
     var request = gapi.client.youtube.channels.list(params);
-
+    console.log(JSON.stringify(params));
     request.execute(channelResponse);
 }
 
@@ -64,15 +65,15 @@ function addVideos(videos) {
     $.merge(window.vidList, videos);
 }
 
-function processRequest(response) {
+function processRequest(result) {
 
-    if(response) {
-        console.log(JSON.stringify(response));
-        window.vCount = response.pageInfo.totalResults;
-        addVideos(response.items);
+    if(result) {
+        console.log(JSON.stringify(result));
+        window.vCount = result.pageInfo.totalResults;
+        addVideos(result.items);
         //next page
-        if(response.nextPageToken) {
-            doRequest(window.listID, response.nextPageToken);
+        if(result.nextPageToken) {
+            doRequest(window.listID, result.nextPageToken);
         } else {
             var vidID = randV(0,window.vidList.length);
             var ytVideo = window.vidList[vidID].contentDetails.videoId;
@@ -108,7 +109,7 @@ function doRequest(listID, pToken) {
 
     function playRandom() {
         window.vidList = [];
-        getUploadList($('#playlist-id').val());
+        getUploadList($('#channel-id').val());
     }
     
     function playVideo(videoID) {
