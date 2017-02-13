@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Random video</title>
+    <style>
+    
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+</head>
+<body>
+ 
+    <div id="playerframe"><div id="player"></div></div>
+    <div id="formul">
+        <label>Playlist Id: <input id="playlist-id" value='' type="text"/></label>
+        <button id="playlist-button" disabled onclick="playRandom();">Play random video</button>
+    </div>
+    <div id="formul2">
+        <label>Channel Id: <input id="channel-id" value='' type="text"/></label>
+        <button id="channel-button" disabled onclick="playRandom();">Play random video</button>
+    </div>
+    <div id="status"></div>
+<script>
+var player;
+
+function randV(lo, hi) {
+    return Math.floor((Math.random() * hi) + lo);
+}
+
+
+googleApiClientReady = function() {
+gapi.client.init({
+          'apiKey': 'AIzaSyDSzS9hOvIAoS2JCd1Hp2Wz-WmCLRPlxn0',
+}).then(function() {
+      gapi.client.load('youtube', 'v3', function() {
+    handleAPILoaded();
+  });
+});
+
+};
+
+function channelResponse(response) {
+    if(respone) {
+        window.vidList = [];
+        var listID = response.items[0].contentDetails.relatedPlaylists.uploads;
+        window.listID=listID;
+        doRequest(listID, null);
+    }
+}
+
+function getUploadList(channel) {
+    var params = {
+        part:'contentDetails',
+        id:channel,
+    };
+    //define request    
+    var request = gapi.client.youtube.channels.list(params);
+
+    request.execute(channelResponse);
+}
+
+function addVideos(videos) {
+    $.merge(window.vidList, videos);
+}
+
+function processRequest(response) {
+
+    if(response) {
+        console.log(JSON.stringify(response));
+        window.vCount = response.pageInfo.totalResults;
+        addVideos(response.items);
+        //next page
+        if(response.nextPageToken) {
+            doRequest(window.listID, response.nextPageToken);
+        } else {
+            var vidID = randV(0,window.vidList.length);
+            var ytVideo = window.vidList[vidID].contentDetails.videoId;
+            console.log("Selected video: "+ytVideo);
+            playVideo(ytVideo);
+        }
+    }
+}
+
+function doRequest(listID, pToken) {
+    
+    var params = {
+        part:'contentDetails',
+        playlistId:listID,
+        maxResults:50,
+    };
+    //set Token
+    if(pToken) {
+        params.pageToken = pToken;
+        console.log("Next page: "+pToken);
+    }
+    //define request    
+    var request = gapi.client.youtube.playlistItems.list(params);
+    console.log(JSON.stringify(params));
+    request.execute(processRequest);
+//    request.then(processRequest);
+
+}
+
+    function handleAPILoaded() {
+        $('#channel-button').removeAttr("disabled");
+    }
+
+    function playRandom() {
+        window.vidList = [];
+        getUploadList($('#playlist-id').val());
+    }
+    
+    function playVideo(videoID) {
+        player = new YT.Player('player', {
+          height: '720',
+          width: '1280',
+          videoId: videoID,
+          events: {
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
+          }
+        });
+    }
+
+    function onPlayerReady(event) {
+        event.target.playVideo();
+      }
+
+     var done = false;
+      function onPlayerStateChange(event) {
+        if (event.data == YT.PlayerState.PLAYING && !done) {
+          //setTimeout(stopVideo, 6000);
+          done = true;
+        }
+      }
+    
+    $( document ).ready(function() {
+        //init yt player api
+      var tag = document.createElement('script');
+
+      tag.src = "https://www.youtube.com/iframe_api";
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    });
+</script>
+<script src="https://apis.google.com/js/client.js?onload=googleApiClientReady"></script>
+</body>
+</html>
